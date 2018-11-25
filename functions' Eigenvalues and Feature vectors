@@ -1,0 +1,204 @@
+#include<stdio.h> 
+#include<iostream> 
+#include <math.h>
+#include"T1.h"   //xt//
+#include"T2.h"  //exp(x)t//
+#include"T3.h"     //(x+t)//
+#include "Eigen/Dense"
+#include "Eigen/Eigenvalues"
+#define N 5
+#define Pi atan2(1,1)*4
+
+using namespace std;
+using namespace Eigen;
+double lroots[N];
+double weight[N];
+double Npoint[N];
+double Nweight[N];
+/*------------------------------------------------------------------------------------------------------------------------------------------*/
+double legend_poly(int n,double x)
+{ if (n==0)
+     return 1;
+  else if (n==1)
+     return x; 
+       else
+       return ((2*n-1)*x*legend_poly(n-1,x)-(n-1)*legend_poly(n-2,x))/n ; //Legendre polynomials recursive formula for n=0 P0(x)=1; for n=1 P1(x)=x;for n>=2 n*Pn(x)=(2n-1)*x*Pn-1(x)-(n-1)*Pn-2(x) 
+}
+/*------------------------------------------------------------------------------------------------------------------------------------------*/
+double legend_diff(int n, double x)
+{
+	return n*(x*legend_poly(n,x)-legend_poly(n-1,x))/(x*x-1);              //Use the general term expression to find the dirivative of the polynomial and caculate Pn'(x)=n*(x*Pn(x)-Pn-1(x))/(x^2-1)
+}
+
+void lege_roots()                                                   
+{
+	int i;
+    double a,b,x,x1;
+    printf("the lower limit(a)="); 
+    scanf("%lf",&a); 
+    printf("the lower limit(b)=");
+    scanf("%lf",&b);
+	for (i=1;i<=N;i++) {
+		x=cos(Pi*(i-0.25)/(N+0.5));
+		do {
+			x1=x;
+			x-=legend_poly(N,x)/legend_diff(N,x);
+		} while(x!=x1);                                                 /*caculate Legendre polynomials'roots'*/ 
+		lroots[i-1]=x;
+		x1=legend_diff(N, x);
+		weight[i-1]= 2/((1-x*x)*x1*x1);                                 //use the relation bewteen weights and roots to caculate；Wi=2/((1-xi^2)*Pn'(xi)^2)
+	}                                  
+	for (i=0;i<N;i++)
+	{Npoint[i]=((b-a)/2)*lroots[i]+(b+a)/2;
+    	Nweight[i]=((b-a)/2)*weight[i];
+								  }                              
+}
+/*------------------------------------------------------------------------------------------------------------------------------------------*/
+int main()
+{
+    double Mat[N][N];
+    int n=9;
+    int s=0;
+    int i,l,j,p,q;
+    printf("SIAE-CAUC\n"); 
+    printf("\n"); 
+    printf("___________________________________________________________________________________________________\n");
+	printf("|                                                                                                  |\n");
+    printf("|   this progrem is to calculate three differents functions' Eigenvalues and Feature vectors'      |\n");
+    printf("|                                                                                                  |\n");
+    printf("|                    Using the Gauss-Legendre method to confirm the New Points                     |\n");
+    printf("|                                                                                                  |\n");
+    printf("|              Frist of all, you should type in the lower limit(a) and upper limit (b)             |\n");
+    printf("|                                                                                                  |\n");
+    printf("|                     Secondly,there are three functions that you can test                         |\n");   
+	printf("|                                                                                                  |\n");
+    printf("|                  Function 1 :x*t    Function 2 :exp(x)*t    Function 3 :x+t                      |\n");
+	printf("|                                                                                                  |\n");
+    printf("|___________________________________________________________________________By 欧阳俊杰____________|\n"); 
+    lege_roots();
+    printf("Which function you want to choose?\n");
+    scanf("%lf",&l); 
+    printf("\n");
+            printf("\n");
+            printf("\n");
+printf("___________________________________________________________________________________________________\n");
+    printf("\n");
+    printf("New point:");
+    for(i=0;i<N;i++)
+    printf("  %g",Npoint[i]);
+    printf("\n");
+    printf("New weights:");
+    for(i=0;i<N;i++)
+    printf("  %g",Nweight[i]);
+printf("\n");
+printf("___________________________________________________________________________________________________\n");
+    printf("\n");
+    printf("\n");
+        printf("\n");
+    if(l=1)
+    {
+printf("___________________________________________________________________________________________________");		
+		        printf("\n there is the coef matrix:\n");
+
+		        for(i=N-1,p=0;i>=0;i--,p++)
+		        {   
+		            printf("\n");
+		            for(j=N-1,q=0;j>=0;j--,q++)
+		            {
+					   	Mat[p][q]=Nweight[j]*T1(Npoint[i],Npoint[j]);
+		            	printf("%0.7f   ",Mat[p][q]);}
+             } 
+printf("\n");
+printf("___________________________________________________________________________________________________\n");
+printf("\n");
+         }
+    else if(l=2)
+		    {
+			printf("\n there is the coef matrix:\n");
+printf("___________________________________________________________________________________________________");		    
+		        
+		        for(i=N-1,p=0;i>=0;i--,p++)
+		        {
+		        	printf("\n");
+		            for(j=N-1,q=0;j>=0;j--,q++)
+		            {
+						Mat[p][q]=Nweight[j]*T1(Npoint[i],Npoint[j]);
+		            	printf("%0.7f   ",Mat[p][q]);
+		            }
+		        }
+		        printf("\n");
+printf("___________________________________________________________________________________________________\n");
+printf("\n");
+		    }
+   else
+		    {
+			printf("\n there is the coefficient matrix:\n");
+printf("___________________________________________________________________________________________________");
+		        for(i=N-1,p=0;i>=0;i--,p++)
+		        {
+		        	printf("\n");
+		            for(j=N-1,q=0;j>=0;j--,q++)
+		            {
+						Mat[p][q]=Nweight[j]*T1(Npoint[i],Npoint[j]);
+		            	printf("%0.7f   ",Mat[p][q]);
+		            }
+		        }
+		        printf("\n");
+printf("___________________________________________________________________________________________________\n");
+printf("\n");
+		    }
+    
+/*------------------------------------------------------------------------------------------------------------------------------------------*/
+MatrixXd Mat_1(N,N);                                  /*C++程序模板*/ 
+    for(i=0;i<N;i++)
+    {
+        for(j=0;j<N;j++)
+            Mat_1(i,j)=Mat[i][j];
+    }
+    printf("\n");
+ printf("___________________________________________________________________________________________________");
+    printf("\n");
+    cout <<"\nHere is the matrix,A:" << endl << Mat_1 << endl <<endl;
+    EigenSolver<MatrixXd> es(Mat_1);
+    MatrixXd D=es.pseudoEigenvalueMatrix();
+    MatrixXd V=es.pseudoEigenvectors();
+printf("___________________________________________________________________________________________________\n");
+printf("\n");
+printf("\n");
+printf("\n");
+printf("___________________________________________________________________________________________________\n");
+printf("\n");
+    cout <<"The pseudo-eigenvalue matrix D is:\n "<< endl <<D<<endl;
+printf("___________________________________________________________________________________________________\n");
+printf("\n");
+printf("\n");
+printf("\n");
+printf("___________________________________________________________________________________________________\n");
+printf("\n");
+    cout << "The psudo-eigenvector matrix V is:" << endl <<V<<endl;
+printf("And we could get the every eigenvector which corresponds to eigenvalue.");
+printf("\n");
+printf("___________________________________________________________________________________________________\n");
+printf("\n");
+printf("\n");
+printf("\n");
+printf("\n");
+printf("\n");
+printf("\n");
+printf("\n");
+printf("\n");
+printf("\n");
+printf("\n");
+printf("\n");
+printf("\n");
+printf("\n");
+printf("type ant key,the screen will be cleared and retrun to the main menu"); 
+system("pause");
+system("cls");
+return main();
+}
+
+
+
+
+
